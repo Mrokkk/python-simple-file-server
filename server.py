@@ -5,16 +5,15 @@ import os
 import sys
 import getopt
 import mimetypes
+import time
 
 async def handle(request):
     filename = str(request.rel_url)
     filename = filename[1:]
-    if filename == '':
-        filename = './'
     print('Handling: ' + filename)
     if filename == 'favicon.ico':
         return web.Response()
-    if os.path.isdir(filename):
+    if os.path.isdir(os.path.normpath(filename)):
         return web.Response(body=directory_listing_body(filename).encode(),
                             headers={'Content-Type': 'text/html'})
     filetype = mimetypes.guess_type(filename)[0]
@@ -63,18 +62,24 @@ def directory_listing_body(dirname):
         Type
     </th>
     <th style="padding-left: 20pt;">
+        Date
+    </th>
+    <th style="padding-left: 20pt;">
         Size
-    </th>""".format(dirname.replace('./', ''))
-    for filename in os.listdir(dirname):
-        path = dirname.replace('/', '') + '/' + filename
-        if os.path.isdir(path):
+    </th>
+    """.format(dirname)
+    real_dirname = os.path.join(os.getcwd(), dirname)
+    for filename in os.listdir(real_dirname):
+        realpath = os.path.join(real_dirname, filename)
+        if os.path.isdir(realpath):
             file_type = 'Dir'
         else:
             file_type = 'File'
+        link_path = '/' + os.path.relpath(realpath, os.getcwd())
         body += """
     <tr>
         <td>
-            <a href={}>{}</a>
+            <a href="{}">{}</a>
         </td>
         <td style="padding-left: 20pt;">
             {}
@@ -82,10 +87,14 @@ def directory_listing_body(dirname):
         <td style="padding-left: 20pt;">
             {}
         </td>
-    </tr>""".format(path,
-                    path.replace('./', ''),
+        <td style="padding-left: 20pt;">
+            {}
+        </td>
+    </tr>""".format(link_path,
+                    filename,
                     file_type,
-                    human_readable_size(os.path.getsize(path)))
+                    time.ctime(os.path.getmtime(realpath)),
+                    human_readable_size(os.path.getsize(realpath)))
     body += """
 <table>
 <hr>
