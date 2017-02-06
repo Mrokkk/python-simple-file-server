@@ -50,23 +50,22 @@ def directory_listing_body(dirname):
 <title>
    Shared
 </title>
+<style>
+th {{
+    text-align: left;
+}}
+</style>
 <h1>
    Directory listing {}
 </h1>
 <hr>
 <table>
-    <th align=left>
-        Name
-    </th>
-    <th style="padding-left: 20pt;">
-        Type
-    </th>
-    <th style="padding-left: 20pt;">
-        Date
-    </th>
-    <th style="padding-left: 20pt;">
-        Size
-    </th>
+    <tr>
+        <th align="left">Name</th>
+        <th style="padding-left: 20pt;">Type</th>
+        <th style="padding-left: 20pt;">Modification date</th>
+        <th style="padding-left: 20pt;">Size</th>
+    </tr>
     """.format(dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
     for filename in os.listdir(real_dirname):
