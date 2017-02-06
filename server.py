@@ -7,33 +7,6 @@ import getopt
 import mimetypes
 import time
 
-async def handle(request):
-    filename = str(request.rel_url)
-    filename = filename[1:]
-    print('Handling: ' + filename)
-    if filename == 'favicon.ico':
-        return web.Response()
-    if os.path.isdir(os.path.normpath(filename)):
-        return web.Response(body=directory_listing_body(filename).encode(),
-                            headers={'Content-Type': 'text/html'})
-    filetype = mimetypes.guess_type(filename)[0]
-    if not filetype:
-        filetype = 'octet/stream'
-    if 'text' in filetype:
-        return web.Response(body=open(filename).read().encode(), headers={
-            'Content-Type': filetype,
-            'Content-Disposition': 'inline'
-        })
-    else:
-        resp = web.StreamResponse(headers={
-            'Content-Type': filetype,
-            'Content-Length': str(os.path.getsize(filename)),
-            'Content-Disposition': 'attachment'
-        })
-        await resp.prepare(request)
-        resp.write(open(filename, 'rb').read())
-        return resp
-
 
 def human_readable_size(num, suffix='B'):
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
@@ -99,6 +72,34 @@ th {{
 <hr>
 </html>"""
     return body
+
+
+async def handle(request):
+    filename = str(request.rel_url)
+    filename = filename[1:]
+    print('Handling: ' + filename)
+    if filename == 'favicon.ico':
+        return web.Response()
+    if os.path.isdir(os.path.normpath(filename)):
+        return web.Response(body=directory_listing_body(filename).encode(),
+                            headers={'Content-Type': 'text/html'})
+    filetype = mimetypes.guess_type(filename)[0]
+    if not filetype:
+        filetype = 'octet/stream'
+    if 'text' in filetype:
+        return web.Response(body=open(filename).read().encode(), headers={
+            'Content-Type': filetype,
+            'Content-Disposition': 'inline'
+        })
+    else:
+        resp = web.StreamResponse(headers={
+            'Content-Type': filetype,
+            'Content-Length': str(os.path.getsize(filename)),
+            'Content-Disposition': 'attachment'
+        })
+        await resp.prepare(request)
+        resp.write(open(filename, 'rb').read())
+        return resp
 
 
 def main(argv):
