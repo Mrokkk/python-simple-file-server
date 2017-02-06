@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 from aiohttp import web
-import os
+import os, sys, getopt
 
 async def handle(request):
     filename = '.' + str(request.rel_url)
@@ -79,8 +79,25 @@ def get_directory_listing(dirname):
     return body
 
 
-app = web.Application()
-app.router.add_get('/{tail:.*}', handle)
+def main(argv):
+    port = None
+    help = 'server.py -p|--port <port>'
+    try:
+        opts, args = getopt.getopt(argv,"hp:", ["help", "port="])
+    except getopt.GetoptError:
+        print(help)
+        sys.exit(1)
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            print(help)
+            sys.exit()
+        elif opt in ('-p', '--port'):
+            port = int(arg)
+    app = web.Application()
+    app.router.add_get('/{tail:.*}', handle)
+    web.run_app(app, port=port)
 
-web.run_app(app)
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
 
