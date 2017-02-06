@@ -1,7 +1,10 @@
 #!/bin/env python3
 
 from aiohttp import web
-import os, sys, getopt, mimetypes
+import os
+import sys
+import getopt
+import mimetypes
 
 async def handle(request):
     filename = '.' + str(request.rel_url)
@@ -9,9 +12,8 @@ async def handle(request):
     if filename == './favicon.ico':
         return web.Response()
     if os.path.isdir(filename):
-        return web.Response(body=get_directory_listing(filename).encode(), headers={
-            'Content-Type': 'text/html'
-        })
+        return web.Response(body=get_directory_listing(filename).encode(),
+                            headers={'Content-Type': 'text/html'})
     mime = mimetypes.guess_type(filename)
     filetype = mime[0]
     if 'text' in filetype:
@@ -60,7 +62,7 @@ def get_directory_listing(dirname):
         Size
     </th>""".format(dirname.replace('.', ''))
     for filename in os.listdir(dirname):
-        fullpath = dirname  + '/' + filename
+        fullpath = dirname + '/' + filename
         if os.path.isdir(fullpath):
             file_type = 'Dir'
         else:
@@ -79,7 +81,10 @@ def get_directory_listing(dirname):
         <td style="padding-left: 20pt;">
             {}
         </td>
-    </tr>""".format(dir + filename, dir + filename, file_type, human_readable_size(os.path.getsize(fullpath)))
+    </tr>""".format(dir + filename,
+                    dir + filename,
+                    file_type,
+                    human_readable_size(os.path.getsize(fullpath)))
     body += """
 <table>
 <hr>
