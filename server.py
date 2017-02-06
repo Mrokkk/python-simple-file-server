@@ -5,9 +5,11 @@ import os
 
 async def handle(request):
     filename = '.' + str(request.rel_url)
-    print(filename)
+    print('Handling: ' + filename)
+    if filename == './favicon.ico':
+        return web.Response()
     if os.path.isdir(filename):
-        return web.Response(body=handle_dir(filename).encode(), headers={'Content-Type': 'text/html'})
+        return web.Response(body=get_directory_listing(filename).encode(), headers={'Content-Type': 'text/html'})
     f = open(filename)
     if filename.endswith('.html'):
         headers = {'Content-Type': 'text/html'}
@@ -26,17 +28,27 @@ def human_readable_size(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
-def handle_dir(dirname):
-    f = \
-        '<!DOCTYPE html>\n' \
-        '<html>\n' \
-        '<title>\n' \
-        '   Shared\n' \
-        '</title>\n' \
-        '<h1>\n' \
-        '   Directory listing {}\n' \
-        '</h1>\n'.format(dirname.replace('.', ''))
-    f += '<hr><table><th align=left>Name</th><th style="padding-left: 20pt;"=left>Type</th><th style="padding-left: 20pt;">Size</th>'
+def get_directory_listing(dirname):
+    f = """\
+<!DOCTYPE html>
+<html>
+<title>
+   Shared
+</title>
+<h1>
+   Directory listing {}
+</h1>
+<hr>
+<table>
+    <th align=left>
+        Name
+    </th>
+    <th style="padding-left: 20pt;">
+        Type
+    </th>
+    <th style="padding-left: 20pt;">
+        Size
+    </th>""".format(dirname.replace('.', ''))
     for filename in os.listdir(dirname):
         if not filename.startswith('.'):
             fullpath = dirname  + '/' + filename
@@ -47,18 +59,22 @@ def handle_dir(dirname):
             if dirname != './':
                 filename = '/' + filename
             dir = dirname.replace('./', '')
-            f += '<tr>\n' \
-                '   <td>\n' \
-                '       <a href={}>{}</a>\n' \
-                '   </td>\n' \
-                '   <td style="padding-left: 20pt;">\n' \
-                '       {}\n' \
-                '   </td>\n' \
-                '   <td style="padding-left: 20pt;">\n' \
-                '       {}\n' \
-                '   </td>\n' \
-                '</tr>\n'.format(dir + filename, dir + filename, file_type, human_readable_size(os.path.getsize(fullpath)))
-    f += '<table><hr></html>'
+            f += """
+    <tr>
+        <td>
+            <a href={}>{}</a>
+        </td>
+        <td style="padding-left: 20pt;">
+            {}
+        </td>
+        <td style="padding-left: 20pt;">
+            {}
+        </td>
+    </tr>""".format(dir + filename, dir + filename, file_type, human_readable_size(os.path.getsize(fullpath)))
+    f += """
+<table>
+<hr>
+</html>"""
     return f
 
 
