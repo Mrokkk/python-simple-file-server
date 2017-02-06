@@ -7,19 +7,23 @@ import getopt
 import mimetypes
 
 async def handle(request):
-    filename = '.' + str(request.rel_url)
+    filename = str(request.rel_url)
+    filename = filename[1:]
+    if filename == '':
+        filename = './'
     print('Handling: ' + filename)
-    if filename == './favicon.ico':
+    if filename == 'favicon.ico':
         return web.Response()
     if os.path.isdir(filename):
-        return web.Response(body=get_directory_listing(filename).encode(),
+        return web.Response(body=directory_listing_body(filename).encode(),
                             headers={'Content-Type': 'text/html'})
-    mime = mimetypes.guess_type(filename)
-    filetype = mime[0]
+    filetype = mimetypes.guess_type(filename)[0]
+    if not filetype:
+        filetype = 'octet/stream'
     if 'text' in filetype:
         return web.Response(body=open(filename).read().encode(), headers={
             'Content-Type': filetype,
-            "Content-Disposition": "inline"
+            'Content-Disposition': 'inline'
         })
     else:
         resp = web.StreamResponse(headers={
@@ -28,7 +32,7 @@ async def handle(request):
             'Content-Disposition': 'attachment'
         })
         await resp.prepare(request)
-        resp.write(open(filename, "rb").read())
+        resp.write(open(filename, 'rb').read())
         return resp
 
 
@@ -40,7 +44,7 @@ def human_readable_size(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
-def get_directory_listing(dirname):
+def directory_listing_body(dirname):
     body = """\
 <!DOCTYPE html>
 <html>
@@ -60,16 +64,13 @@ def get_directory_listing(dirname):
     </th>
     <th style="padding-left: 20pt;">
         Size
-    </th>""".format(dirname.replace('.', ''))
+    </th>""".format(dirname.replace('./', ''))
     for filename in os.listdir(dirname):
-        fullpath = dirname + '/' + filename
-        if os.path.isdir(fullpath):
+        path = dirname.replace('/', '') + '/' + filename
+        if os.path.isdir(path):
             file_type = 'Dir'
         else:
             file_type = 'File'
-        if dirname != './':
-            filename = '/' + filename
-        dir = dirname.replace('./', '')
         body += """
     <tr>
         <td>
@@ -81,10 +82,10 @@ def get_directory_listing(dirname):
         <td style="padding-left: 20pt;">
             {}
         </td>
-    </tr>""".format(dir + filename,
-                    dir + filename,
+    </tr>""".format(path,
+                    path.replace('./', ''),
                     file_type,
-                    human_readable_size(os.path.getsize(fullpath)))
+                    human_readable_size(os.path.getsize(path)))
     body += """
 <table>
 <hr>
@@ -103,7 +104,7 @@ def main(argv):
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             print(help)
-            sys.exit()
+            sys.exit(0)
         elif opt in ('-p', '--port'):
             port = int(arg)
     app = web.Application()
