@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 from aiohttp import web
-import os, sys, getopt
+import os, sys, getopt, mimetypes
 
 async def handle(request):
     filename = '.' + str(request.rel_url)
@@ -9,19 +9,29 @@ async def handle(request):
     if filename == './favicon.ico':
         return web.Response()
     if os.path.isdir(filename):
-        return web.Response(body=get_directory_listing(filename).encode(), headers={'Content-Type': 'text/html'})
-    f = open(filename)
-    if filename.endswith('.html'):
-        headers = {'Content-Type': 'text/html'}
-    elif filename.endswith('.tar.gz'):
-        headers = {'Content-Type': 'application/octet-stream'}
+        return web.Response(body=get_directory_listing(filename).encode(), headers={
+            'Content-Type': 'text/html'
+        })
+    mime = mimetypes.guess_type(filename)
+    filetype = mime[0]
+    if 'text' in filetype:
+        return web.Response(body=open(filename).read().encode(), headers={
+            'Content-Type': filetype,
+            "Content-Disposition": "inline"
+        })
     else:
-        headers = {'Content-Type': 'text/plain', "Content-Disposition": "inline"}
-    return web.Response(body=f.read().encode(), headers=headers)
+        resp = web.StreamResponse(headers={
+            'Content-Type': filetype,
+            'Content-Length': str(os.path.getsize(filename)),
+            'Content-Disposition': 'attachment'
+        })
+        await resp.prepare(request)
+        resp.write(open(filename, "rb").read())
+        return resp
 
 
 def human_readable_size(num, suffix='B'):
-    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
@@ -50,13 +60,11 @@ def get_directory_listing(dirname):
         Size
     </th>""".format(dirname.replace('.', ''))
     for filename in os.listdir(dirname):
-        if filename.startswith('.'): # Don't show hidden files
-            break
         fullpath = dirname  + '/' + filename
         if os.path.isdir(fullpath):
-            file_type='Dir'
+            file_type = 'Dir'
         else:
-            file_type='File'
+            file_type = 'File'
         if dirname != './':
             filename = '/' + filename
         dir = dirname.replace('./', '')
@@ -83,7 +91,7 @@ def main(argv):
     port = None
     help = 'server.py -p|--port <port>'
     try:
-        opts, args = getopt.getopt(argv,"hp:", ["help", "port="])
+        opts, args = getopt.getopt(argv, "hp:", ["help", "port="])
     except getopt.GetoptError:
         print(help)
         sys.exit(1)
@@ -100,4 +108,3 @@ def main(argv):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-
