@@ -29,7 +29,7 @@ def human_readable_size(num, suffix='B'):
 
 
 def get_directory_listing(dirname):
-    f = """\
+    body = """\
 <!DOCTYPE html>
 <html>
 <title>
@@ -50,16 +50,17 @@ def get_directory_listing(dirname):
         Size
     </th>""".format(dirname.replace('.', ''))
     for filename in os.listdir(dirname):
-        if not filename.startswith('.'):
-            fullpath = dirname  + '/' + filename
-            if os.path.isdir(fullpath):
-                file_type='Dir'
-            else:
-                file_type='File'
-            if dirname != './':
-                filename = '/' + filename
-            dir = dirname.replace('./', '')
-            f += """
+        if filename.startswith('.'): # Don't show hidden files
+            break
+        fullpath = dirname  + '/' + filename
+        if os.path.isdir(fullpath):
+            file_type='Dir'
+        else:
+            file_type='File'
+        if dirname != './':
+            filename = '/' + filename
+        dir = dirname.replace('./', '')
+        body += """
     <tr>
         <td>
             <a href={}>{}</a>
@@ -71,11 +72,11 @@ def get_directory_listing(dirname):
             {}
         </td>
     </tr>""".format(dir + filename, dir + filename, file_type, human_readable_size(os.path.getsize(fullpath)))
-    f += """
+    body += """
 <table>
 <hr>
 </html>"""
-    return f
+    return body
 
 
 app = web.Application()
