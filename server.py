@@ -6,6 +6,7 @@ import sys
 import getopt
 import mimetypes
 import time
+import subprocess
 
 
 def human_readable_size(num, suffix='B'):
@@ -21,7 +22,7 @@ def directory_listing_body(dirname):
 <!DOCTYPE html>
 <html>
 <title>
-   Shared
+   Directory listing /{}
 </title>
 <style>
 th {{
@@ -29,7 +30,7 @@ th {{
 }}
 </style>
 <h1>
-   Directory listing {}
+   Directory listing /{}
 </h1>
 <hr>
 <table>
@@ -39,7 +40,7 @@ th {{
         <th style="padding-left: 20pt;">Modification date</th>
         <th style="padding-left: 20pt;">Size</th>
     </tr>
-    """.format(dirname)
+    """.format(dirname, dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
     for filename in os.listdir(real_dirname):
         realpath = os.path.join(real_dirname, filename)
@@ -85,10 +86,15 @@ async def handle(request):
                             headers={'Content-Type': 'text/html'})
     filetype = mimetypes.guess_type(filename)[0]
     if not filetype:
-        filetype = 'octet/stream'
+        proc = subprocess.Popen(['file', filename], stdout=subprocess.PIPE)
+        tmp = proc.stdout.read()
+        if 'text' in str(tmp):
+            filetype = 'text/plain'
+        else:
+            filetype = 'octet/stream'
     if 'text' in filetype:
         return web.Response(body=open(filename).read().encode(), headers={
-            'Content-Type': filetype,
+            'Content-Type': 'text/plain',
             'Content-Disposition': 'inline'
         })
     else:
