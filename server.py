@@ -7,6 +7,7 @@ import getopt
 import mimetypes
 import time
 import subprocess
+import ssl
 
 
 def human_readable_size(num, suffix='B'):
@@ -76,8 +77,7 @@ th {{
 
 
 async def handle(request):
-    filename = str(request.rel_url)
-    filename = filename[1:]
+    filename = str(request.rel_url)[1:]
     print('Handling: ' + filename)
     if filename == 'favicon.ico':
         return web.Response()
@@ -86,9 +86,7 @@ async def handle(request):
                             headers={'Content-Type': 'text/html'})
     filetype = mimetypes.guess_type(filename)[0]
     if not filetype:
-        proc = subprocess.Popen(['file', filename], stdout=subprocess.PIPE)
-        tmp = proc.stdout.read()
-        if 'text' in str(tmp):
+        if 'text' in str(subprocess.Popen(['file', filename], stdout=subprocess.PIPE).stdout.read()):
             filetype = 'text/plain'
         else:
             filetype = 'octet/stream'
@@ -110,9 +108,13 @@ async def handle(request):
 
 def main(argv):
     port = None
-    help = 'server.py -p|--port <port> -s|--ssl'
+    context = None
+    key = None
+    cert = None
+    password = None
+    help = 'server.py -p|--port=<port> -c|--cert=<cert_file> -k|--key=<key_file> -t|--pass=<password>'
     try:
-        opts, args = getopt.getopt(argv, "hp:s", ["help", "port=", "ssl"])
+        opts, args = getopt.getopt(argv, "hp:c:k:t:", ["help", "port=", "cert=", "key=", "pass="])
     except getopt.GetoptError:
         print(help)
         sys.exit(1)
@@ -122,12 +124,21 @@ def main(argv):
             sys.exit(0)
         elif opt in ('-p', '--port'):
             port = int(arg)
-        elif opt in ('-s', '--ssl'):
-            ssl=True
+        elif opt in ('-c', '--cert'):
+            cert = str(arg)
+        elif opt in ('-k', '--key'):
+            key = str(arg)
+        elif opt in ('-t', '--pass'):
+            password = str(arg)
+    if key and cert:
+        print('Using SSL')
+        context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
+        context.load_cert_chain(cert, keyfile=key, password=password)
     app = web.Application()
     app.router.add_get('/{tail:.*}', handle)
-    web.run_app(app, port=port, ssl_context=None)
+    web.run_app(app, port=port, ssl_context=context)
 
 
 if __name__ == '__main__':
+    pwd = os.path.dirname(sys.argv[0])
     main(sys.argv[1:])
