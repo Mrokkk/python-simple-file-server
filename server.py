@@ -110,9 +110,9 @@ async def handle(request):
 
 def main(argv):
     port = None
-    help = 'server.py -p|--port <port>'
+    help = 'server.py -p|--port <port> -s|--ssl'
     try:
-        opts, args = getopt.getopt(argv, "hp:", ["help", "port="])
+        opts, args = getopt.getopt(argv, "hp:s", ["help", "port=", "ssl"])
     except getopt.GetoptError:
         print(help)
         sys.exit(1)
@@ -122,9 +122,11 @@ def main(argv):
             sys.exit(0)
         elif opt in ('-p', '--port'):
             port = int(arg)
+        elif opt in ('-s', '--ssl'):
+            ssl=True
     app = web.Application()
     app.router.add_get('/{tail:.*}', handle)
-    web.run_app(app, port=port)
+    web.run_app(app, port=port, ssl_context=None)
 
 
 if __name__ == '__main__':
