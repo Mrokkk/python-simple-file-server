@@ -8,6 +8,40 @@ import mimetypes
 import time
 import subprocess
 import ssl
+import string
+
+html_head = """
+<!DOCTYPE html>
+<html>
+<title>Directory listing /$title</title>
+<style>
+th {{ text-align: left; }}
+</style>
+<h1>Directory listing /$title</h1>
+<hr>
+<table>
+    <tr>
+        <th align="left">Name</th>
+        <th style="padding-left: 20pt;">Type</th>
+        <th style="padding-left: 20pt;">Modification date</th>
+        <th style="padding-left: 20pt;">Size</th>
+    </tr>
+"""
+
+html_foot = """
+<table>
+<hr>
+</html>
+"""
+
+filename_entry = """
+    <tr>
+        <td><a href="$link">$filename</a></td>
+        <td style="padding-left: 20pt;">$filetype</td>
+        <td style="padding-left: 20pt;">$mtime</td>
+        <td style="padding-left: 20pt;">$size</td>
+    </tr>
+"""
 
 
 def human_readable_size(num, suffix='B'):
@@ -19,60 +53,18 @@ def human_readable_size(num, suffix='B'):
 
 
 def directory_listing_body(dirname):
-    body = """\
-<!DOCTYPE html>
-<html>
-<title>
-   Directory listing /{}
-</title>
-<style>
-th {{
-    text-align: left;
-}}
-</style>
-<h1>
-   Directory listing /{}
-</h1>
-<hr>
-<table>
-    <tr>
-        <th align="left">Name</th>
-        <th style="padding-left: 20pt;">Type</th>
-        <th style="padding-left: 20pt;">Modification date</th>
-        <th style="padding-left: 20pt;">Size</th>
-    </tr>
-    """.format(dirname, dirname)
+    body = string.Template(html_head).substitute(title=dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
     for filename in os.listdir(real_dirname):
         realpath = os.path.join(real_dirname, filename)
-        if os.path.isdir(realpath):
-            file_type = 'Dir'
-        else:
-            file_type = 'File'
+        file_type = 'Dir' if os.path.isdir(realpath) else 'File'
         link_path = '/' + os.path.relpath(realpath, os.getcwd())
-        body += """
-    <tr>
-        <td>
-            <a href="{}">{}</a>
-        </td>
-        <td style="padding-left: 20pt;">
-            {}
-        </td>
-        <td style="padding-left: 20pt;">
-            {}
-        </td>
-        <td style="padding-left: 20pt;">
-            {}
-        </td>
-    </tr>""".format(link_path,
-                    filename,
-                    file_type,
-                    time.ctime(os.path.getmtime(realpath)),
-                    human_readable_size(os.path.getsize(realpath)))
-    body += """
-<table>
-<hr>
-</html>"""
+        body += string.Template(filename_entry).substitute(link=link_path,
+                    filename=filename,
+                    filetype=file_type,
+                    mtime=time.ctime(os.path.getmtime(realpath)),
+                    size=human_readable_size(os.path.getsize(realpath)))
+    body += html_foot
     return body
 
 
