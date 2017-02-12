@@ -3,7 +3,7 @@
 from aiohttp import web
 import os
 import sys
-import getopt
+import argparse
 import mimetypes
 import time
 import subprocess
@@ -107,36 +107,19 @@ async def handle(request):
 
 
 def main(argv):
-    port = None
     context = None
-    key = None
-    cert = None
-    password = None
-    help = 'server.py -p|--port=<port> -c|--cert=<cert_file> -k|--key=<key_file> -t|--pass=<password>'
-    try:
-        opts, args = getopt.getopt(argv, "hp:c:k:t:", ["help", "port=", "cert=", "key=", "pass="])
-    except getopt.GetoptError:
-        print(help)
-        sys.exit(1)
-    for opt, arg in opts:
-        if opt in ('-h', '--help'):
-            print(help)
-            sys.exit(0)
-        elif opt in ('-p', '--port'):
-            port = int(arg)
-        elif opt in ('-c', '--cert'):
-            cert = str(arg)
-        elif opt in ('-k', '--key'):
-            key = str(arg)
-        elif opt in ('-t', '--pass'):
-            password = str(arg)
-    if key and cert:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--port', help='use given port', type=int)
+    parser.add_argument('-s', '--ssl', nargs=2, help='use SSL', metavar=('CERT', 'KEY'))
+    parser.add_argument('-t', '--passwd', help='use given passphrase (SSL)')
+    args = parser.parse_args()
+    if args.ssl:
         print('Using SSL')
         context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
-        context.load_cert_chain(cert, keyfile=key, password=password)
+        context.load_cert_chain(args.ssl[0], keyfile=args.ssl[1], password=args.passwd)
     app = web.Application()
     app.router.add_get('/{tail:.*}', handle)
-    web.run_app(app, port=port, ssl_context=context)
+    web.run_app(app, port=args.port, ssl_context=context)
 
 
 if __name__ == '__main__':
