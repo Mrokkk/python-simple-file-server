@@ -9,6 +9,7 @@ import time
 import subprocess
 import ssl
 import string
+import logging
 
 html_head = """
 <!DOCTYPE html>
@@ -70,7 +71,6 @@ def directory_listing_body(dirname):
 
 async def handle(request):
     filename = str(request.rel_url)[1:]
-    print('Handling: ' + filename)
     if filename == 'favicon.ico':
         return web.Response()
     if os.path.isdir(os.path.normpath(filename)):
@@ -98,6 +98,16 @@ async def handle(request):
         return resp
 
 
+def configure_logger(filename):
+    logging.basicConfig(filename=filename,
+                        level=logging.DEBUG)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    logger = logging.getLogger('')
+    logger.addHandler(console)
+    return logger
+
+
 def main(argv):
     context = None
     parser = argparse.ArgumentParser()
@@ -105,11 +115,11 @@ def main(argv):
     parser.add_argument('-s', '--ssl', nargs=2, help='use SSL', metavar=('CERT', 'KEY'))
     parser.add_argument('-t', '--passwd', help='use given passphrase (SSL)')
     args = parser.parse_args()
+    log = configure_logger('log')
     if args.ssl:
-        print('Using SSL')
         context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
         context.load_cert_chain(args.ssl[0], keyfile=args.ssl[1], password=args.passwd)
-    app = web.Application()
+    app = web.Application(logger=log)
     app.router.add_get('/{tail:.*}', handle)
     web.run_app(app, port=args.port, ssl_context=context)
 
