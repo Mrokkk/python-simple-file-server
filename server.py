@@ -11,8 +11,7 @@ import ssl
 import string
 import logging
 
-html_head = """
-<!DOCTYPE html>
+html_head = """<!DOCTYPE html>
 <html>
 <title>Directory listing /$title</title>
 <style>
@@ -26,14 +25,11 @@ th {{ text-align: left; }}
         <th style="padding-left: 20pt;">Type</th>
         <th style="padding-left: 20pt;">Modification date</th>
         <th style="padding-left: 20pt;">Size</th>
-    </tr>
-"""
+    </tr>"""
 
-html_foot = """
-<table>
+html_foot = """</table>
 <hr>
-</html>
-"""
+</html>"""
 
 filename_entry = """
     <tr>
@@ -99,8 +95,7 @@ async def handle(request):
 
 
 def configure_logger(filename):
-    logging.basicConfig(filename=filename,
-                        level=logging.DEBUG)
+    logging.basicConfig(filename=filename, level=logging.DEBUG)
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     logger = logging.getLogger('')
