@@ -110,7 +110,7 @@ def main(argv):
     parser.add_argument('-s', '--ssl', nargs=2, help='use SSL', metavar=('CERT', 'KEY'))
     parser.add_argument('-t', '--passwd', help='use given passphrase (SSL)')
     args = parser.parse_args()
-    log = configure_logger('log')
+    log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
     if args.ssl:
         context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
         context.load_cert_chain(args.ssl[0], keyfile=args.ssl[1], password=args.passwd)
