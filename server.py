@@ -79,10 +79,11 @@ async def handle(request):
         else:
             filetype = 'octet/stream'
     if 'text' in filetype:
-        return web.Response(body=open(filename).read().encode(), headers={
-            'Content-Type': 'text/plain',
-            'Content-Disposition': 'inline'
-        })
+        with open(filename) as f:
+            return web.Response(body=f.read().encode(), headers={
+                'Content-Type': 'text/plain',
+                'Content-Disposition': 'inline'
+            })
     else:
         resp = web.StreamResponse(headers={
             'Content-Type': filetype,
@@ -90,7 +91,8 @@ async def handle(request):
             'Content-Disposition': 'attachment'
         })
         await resp.prepare(request)
-        resp.write(open(filename, 'rb').read())
+        with open(filename, 'rb') as f:
+            resp.write(f.read())
         return resp
 
 
