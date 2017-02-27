@@ -69,6 +69,8 @@ async def handle(request):
     filename = str(request.rel_url)[1:]
     if filename == 'favicon.ico':
         return web.Response()
+    if not os.path.exists(os.path.normpath(filename)):
+        return web.Response(status=404)
     if os.path.isdir(os.path.normpath(filename)):
         return web.Response(body=directory_listing_body(filename).encode(),
                             headers={'Content-Type': 'text/html'})
