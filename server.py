@@ -152,7 +152,7 @@ def create_ssl_context(ssl_args):
     return context
 
 
-def main(argv):
+def main():
     context = None
     args = parse_argv()
     log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
@@ -162,5 +162,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    pwd = os.path.dirname(sys.argv[0])
-    main(sys.argv[1:])
+    main()
