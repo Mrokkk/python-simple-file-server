@@ -65,6 +65,26 @@ def directory_listing_body(dirname):
     return body
 
 
+async def binary_file_response(filename, filetype, request):
+    resp = web.StreamResponse(headers={
+        'Content-Type': filetype,
+        'Content-Length': str(os.path.getsize(filename)),
+        'Content-Disposition': 'attachment'
+    })
+    await resp.prepare(request)
+    with open(filename, 'rb') as f:
+        resp.write(f.read())
+    return resp
+
+
+async def text_file_response(filename):
+    with open(filename) as f:
+        return web.Response(body=f.read().encode(), headers={
+            'Content-Type': 'text/plain',
+            'Content-Disposition': 'inline'
+        })
+
+
 async def handle(request):
     filename = str(request.rel_url)[1:]
     if filename == 'favicon.ico':
@@ -81,21 +101,9 @@ async def handle(request):
         else:
             filetype = 'octet/stream'
     if 'text' in filetype:
-        with open(filename) as f:
-            return web.Response(body=f.read().encode(), headers={
-                'Content-Type': 'text/plain',
-                'Content-Disposition': 'inline'
-            })
+        return await text_file_response(filename)
     else:
-        resp = web.StreamResponse(headers={
-            'Content-Type': filetype,
-            'Content-Length': str(os.path.getsize(filename)),
-            'Content-Disposition': 'attachment'
-        })
-        await resp.prepare(request)
-        with open(filename, 'rb') as f:
-            resp.write(f.read())
-        return resp
+        return await binary_file_response(filename, filetype, request)
 
 
 def configure_logger(filename):
