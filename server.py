@@ -77,7 +77,7 @@ async def binary_file_response(filename, filetype, request):
     return resp
 
 
-async def text_file_response(filename):
+def text_file_response(filename):
     with open(filename) as f:
         return web.Response(body=f.read().encode(), headers={
             'Content-Type': 'text/plain',
@@ -101,7 +101,7 @@ async def handle(request):
         else:
             filetype = 'octet/stream'
     if 'text' in filetype:
-        return await text_file_response(filename)
+        return text_file_response(filename)
     else:
         return await binary_file_response(filename, filetype, request)
 
@@ -115,20 +115,28 @@ def configure_logger(filename):
     return logger
 
 
-def main(argv):
-    context = None
+def parse_argv():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--port', help='use given port', type=int)
     parser.add_argument('-s', '--ssl', nargs=2, help='use SSL', metavar=('CERT', 'KEY'))
-    parser.add_argument('-t', '--passwd', help='use given passphrase (SSL)')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def create_ssl_context(ssl_args):
+    if not ssl:
+        return None
+    context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain(ssl_args[0], keyfile=ssl_args[1])
+    return context
+
+
+def main(argv):
+    context = None
+    args = parse_argv()
     log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
-    if args.ssl:
-        context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
-        context.load_cert_chain(args.ssl[0], keyfile=args.ssl[1], password=args.passwd)
     app = web.Application(logger=log)
     app.router.add_get('/{tail:.*}', handle)
-    web.run_app(app, port=args.port, ssl_context=context)
+    web.run_app(app, port=args.port, ssl_context=create_ssl_context(args.ssl))
 
 
 if __name__ == '__main__':
