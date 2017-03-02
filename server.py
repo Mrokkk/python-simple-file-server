@@ -14,77 +14,9 @@ import logging
 html_head = """<!DOCTYPE html>
 <html>
 <title>Directory listing /$title</title>
-<style>
-* {
-    padding:0;
-    margin:0;
-}
-body {
-    color: #333;
-    font: 14px Sans-Serif;
-    padding: 20px;
-    background: #eee;
-}
-hr {
-    margin: 20px;
-}
-h1 {
-    text-align: center;
-    padding: 20px 0 12px 0;
-    margin: 0;
-}
-table {
-    background-color: #F3F3F3;
-    border-collapse: collapse;
-    width: 100%;
-    margin: 15px 0;
-}
-th {
-    background-color: #0066cc;
-    color: #FFF;
-    padding: 5px 10px;
-}
-th:first-of-type {
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-}
-th:last-of-type {
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-th small {
-    font-size: 9px;
-}
-td, th {
-    text-align: left;
-}
-td:first-of-type a {
-    padding-left: 38px;
-}
-a {
-    text-decoration: none;
-}
-td a {
-    color: #663300;
-    display: block;
-    padding: 5px 10px;
-}
-tr:nth-of-type(odd) {
-    background-color: #E6E6E6;
-}
-tr:hover td {
-    background-color:#CACACA;
-}
-tr:hover td a {
-    color: #000;
-}
-table tr.dir td:first-of-type a {
-    background: url(/.icons/dir.png) no-repeat 10px 50%;
-}
-table tr.file td:first-of-type a {
-    background: url(/.icons/file.png) no-repeat 10px 50%;
-}
-</style>
+<head>
+<link rel="stylesheet" type="text/css" href="/.css/style.css" />
+</head>
 <h1>Directory listing /$title</h1>
 <hr>
 <table>
@@ -228,7 +160,8 @@ def main():
     args = parse_argv()
     log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
     app = web.Application(logger=log)
-    app.router.add_static('/.icons', os.path.join(os.path.dirname(sys.argv[0]), 'icons'), follow_symlinks=True)
+    app.router.add_static('/.css', os.path.join(os.path.dirname(sys.argv[0]), 'css'))
+    app.router.add_static('/.icons', os.path.join(os.path.dirname(sys.argv[0]), 'icons'))
     app.router.add_get('/{tail:.*}', handle)
     web.run_app(app, port=args.port, ssl_context=create_ssl_context(args.ssl))
 
