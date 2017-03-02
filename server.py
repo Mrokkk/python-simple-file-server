@@ -85,6 +85,27 @@ def text_file_response(filename):
         })
 
 
+def html_response(filename):
+    with open(filename) as f:
+        return web.Response(body=f.read().encode(), headers={
+            'Content-Type': 'text/html'
+        })
+
+
+def directory_response(filename):
+    if os.path.exists(os.path.join(filename, 'index.html')):
+        return html_response(os.path.join(filename, 'index.html'))
+    return web.Response(body=directory_listing_body(filename).encode(),
+                        headers={'Content-Type': 'text/html'})
+
+
+def filetype_fallback(filename):
+    if 'text' in str(subprocess.Popen(['file', filename], stdout=subprocess.PIPE).stdout.read()):
+        return 'text/plain'
+    else:
+        return 'octet/stream'
+
+
 async def handle(request):
     filename = str(request.rel_url)[1:]
     if filename == 'favicon.ico':
@@ -92,14 +113,10 @@ async def handle(request):
     if not os.path.exists(os.path.normpath(filename)):
         return web.Response(status=404)
     if os.path.isdir(os.path.normpath(filename)):
-        return web.Response(body=directory_listing_body(filename).encode(),
-                            headers={'Content-Type': 'text/html'})
+        return directory_response(filename)
     filetype = mimetypes.guess_type(filename)[0]
     if not filetype:
-        if 'text' in str(subprocess.Popen(['file', filename], stdout=subprocess.PIPE).stdout.read()):
-            filetype = 'text/plain'
-        else:
-            filetype = 'octet/stream'
+        filetype = filetype_fallback(filename)
     if 'text' in filetype:
         return text_file_response(filename)
     else:
