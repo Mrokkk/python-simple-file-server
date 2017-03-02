@@ -143,7 +143,12 @@ def create_ssl_context(ssl_args):
     if not ssl:
         return None
     context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
-    context.load_cert_chain(ssl_args[0], keyfile=ssl_args[1])
+    try:
+        context.load_cert_chain(ssl_args[0], keyfile=ssl_args[1])
+    except Exception as exc:
+        print('Error: {}'.format(exc))
+        print('Starting without SSL')
+        return None
     return context
 
 
