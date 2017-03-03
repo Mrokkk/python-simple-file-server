@@ -11,6 +11,7 @@ import ssl
 import string
 import logging
 import glob
+import re
 
 html_head = """<!DOCTYPE html>
 <html>
@@ -124,7 +125,8 @@ def filetype_fallback(filename):
 def search_result_body(dirname, name):
     body = string.Template(html_head).substitute(title=dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
-    list = glob.iglob('*' + name + '*', recursive=True)
+    file_list = [file[2:] for file in glob.glob(os.path.relpath(real_dirname, os.getcwd()) + '/**/*', recursive=True)]
+    list = [file for file in file_list if name.lower() in file.lower()]
     body += list_file_entries(list, real_dirname)
     body += html_foot
     return body
