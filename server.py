@@ -52,7 +52,9 @@ def human_readable_size(num, suffix='B'):
 def directory_listing_body(dirname):
     body = string.Template(html_head).substitute(title=dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
-    for filename in os.listdir(real_dirname):
+    list = os.listdir(real_dirname)
+    list.insert(0, '..')
+    for filename in list:
         realpath = os.path.join(real_dirname, filename)
         is_dir = True if os.path.isdir(realpath) else False
         file_type = 'Dir' if is_dir else 'File'
