@@ -10,6 +10,7 @@ import subprocess
 import ssl
 import string
 import logging
+import glob
 
 html_head = """<!DOCTYPE html>
 <html>
@@ -19,6 +20,9 @@ html_head = """<!DOCTYPE html>
 </head>
 <h1>Directory listing /$title</h1>
 <hr>
+<form>
+  <input type="text" name="search" placeholder="Search...">
+</form>
 <table>
     <tr>
         <th align="left">Name</th>
@@ -49,13 +53,10 @@ def human_readable_size(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
-def directory_listing_body(dirname):
-    body = string.Template(html_head).substitute(title=dirname)
-    real_dirname = os.path.join(os.getcwd(), dirname)
-    list = os.listdir(real_dirname)
-    list.insert(0, '..')
-    for filename in list:
-        realpath = os.path.join(real_dirname, filename)
+def list_file_entries(file_list, dirname):
+    body = ''
+    for filename in file_list:
+        realpath = os.path.join(dirname, filename)
         is_dir = True if os.path.isdir(realpath) else False
         file_type = 'Dir' if is_dir else 'File'
         link_path = '/' + os.path.relpath(realpath, os.getcwd())
@@ -66,6 +67,15 @@ def directory_listing_body(dirname):
             mtime=time.ctime(os.path.getmtime(realpath)),
             size=human_readable_size(os.path.getsize(realpath)),
             class_name='dir' if is_dir else 'file')
+    return body
+
+
+def directory_listing_body(dirname):
+    body = string.Template(html_head).substitute(title=dirname)
+    real_dirname = os.path.join(os.getcwd(), dirname)
+    list = os.listdir(real_dirname)
+    list.insert(0, '..')
+    body += list_file_entries(list, real_dirname)
     body += html_foot
     return body
 
@@ -111,8 +121,28 @@ def filetype_fallback(filename):
         return 'octet/stream'
 
 
+def search_result_body(dirname, name):
+    body = string.Template(html_head).substitute(title=dirname)
+    real_dirname = os.path.join(os.getcwd(), dirname)
+    list = glob.iglob('*' + name + '*', recursive=True)
+    body += list_file_entries(list, real_dirname)
+    body += html_foot
+    return body
+
+
+def query_handle_response(filename, query_string):
+    query = query_string.split('=')
+    if query[0] == 'search':
+        return web.Response(body=search_result_body(filename, query[1]).encode(),
+                            headers={'Content-Type': 'text/html'})
+    return web.Response()
+
+
 async def handle(request):
-    filename = str(request.rel_url)[1:]
+    filename = str(request.path)[1:]
+    query_string = str(request.query_string)
+    if query_string != '':
+        return query_handle_response(filename, query_string)
     if filename == 'favicon.ico':
         return web.Response()
     if not os.path.exists(os.path.normpath(filename)):

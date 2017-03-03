@@ -67,3 +67,11 @@ table tr.dir td:first-of-type a {
 table tr.file td:first-of-type a {
     background: url(/.icons/file.png) no-repeat 10px 50%;
 }
+input[type=text] {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 6px 6px 6px 6px;
+}
