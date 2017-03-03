@@ -119,6 +119,8 @@ async def handle(request):
         return web.Response(status=404)
     if os.path.isdir(os.path.normpath(filename)):
         return directory_response(filename)
+    if filename.endswith('.html'):
+        return html_response(filename)
     filetype = mimetypes.guess_type(filename)[0]
     if not filetype:
         filetype = filetype_fallback(filename)
