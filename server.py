@@ -149,7 +149,10 @@ async def handle(request):
     if query_string != '':
         return query_handle_response(filename, query_string)
     if filename == 'favicon.ico':
-        return web.Response()
+        with open(os.path.join(os.path.dirname(sys.argv[0]), 'icons/favicon.ico'), 'rb') as f:
+            return web.Response(body=f.read(), headers={
+                    'Content-Type': 'image/x-icon'
+                })
     if not os.path.exists(os.path.normpath(filename)):
         return web.Response(status=404)
     if os.path.isdir(os.path.normpath(filename)):
