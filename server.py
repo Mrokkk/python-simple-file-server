@@ -47,11 +47,11 @@ filename_entry = """
 
 
 def human_readable_size(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti']:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
+    return "%.1f%s%s" % (num, 'Pi', suffix)
 
 
 def list_file_entries(file_list, dirname):
@@ -195,7 +195,6 @@ def create_ssl_context(ssl_args):
 
 
 def main():
-    context = None
     args = parse_argv()
     log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
     app = web.Application(logger=log)
