@@ -38,10 +38,10 @@ html_foot = """</table>
 
 filename_entry = """
     <tr class=$class_name>
-        <td><a href="$link">$filename</a></td>
-        <td style="padding-left: 20pt;">$filetype</td>
-        <td style="padding-left: 20pt;">$mtime</td>
-        <td style="padding-left: 20pt;">$size</td>
+        <td width="40%"><a href="$link">$filename</a></td>
+        <td style="padding-left: 20pt;" width="20%">$filetype</td>
+        <td style="padding-left: 20pt;" width="20%">$mtime</td>
+        <td style="padding-left: 20pt;" width="20%">$size</td>
     </tr>
 """
 
