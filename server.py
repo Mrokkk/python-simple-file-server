@@ -15,11 +15,11 @@ import re
 
 html_head = """<!DOCTYPE html>
 <html>
-<title>Directory listing /$title</title>
+<title>$title</title>
 <head>
 <link rel="stylesheet" type="text/css" href="/.css/style.css" />
 </head>
-<h1>Directory listing /$title</h1>
+<h1>$title</h1>
 <hr>
 <form>
   <input type="text" name="search" placeholder="Search...">
@@ -72,7 +72,7 @@ def list_file_entries(file_list, dirname):
 
 
 def directory_listing_body(dirname):
-    body = string.Template(html_head).substitute(title=dirname)
+    body = string.Template(html_head).substitute(title='Directory listing /' + dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
     list = os.listdir(real_dirname)
     list.insert(0, '..')
@@ -123,10 +123,13 @@ def filetype_fallback(filename):
 
 
 def search_result_body(dirname, name):
-    body = string.Template(html_head).substitute(title=dirname)
+    body = string.Template(html_head).substitute(title='Search result for "' + name + '"')
     real_dirname = os.path.join(os.getcwd(), dirname)
-    file_list = [file[2:] for file in glob.glob(os.path.relpath(real_dirname, os.getcwd()) + '/**/*', recursive=True)]
+    file_list = [file for file in glob.glob(os.path.join(dirname, '**/*'), recursive=True)]
     list = [file for file in file_list if name.lower() in file.lower()]
+    if dirname != '':
+        list = map(str, list)
+        list = map(lambda x: x.replace(dirname + '/', ''), list)
     body += list_file_entries(list, real_dirname)
     body += html_foot
     return body
