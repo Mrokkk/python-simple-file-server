@@ -17,31 +17,45 @@ html_head = """<!DOCTYPE html>
 <html>
 <title>$title</title>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/.css/style.css" />
 </head>
+<div class="container-fluid">
 <h1>$title</h1>
+</div>
 <hr>
+<div class="container-fluid">
 <form>
-  <input type="text" name="search" placeholder="Search...">
+  <input type="text" class="form-control" name="search" placeholder="Search...">
 </form>
-<table>
+</div>
+<div class="container-fluid">
+<table data-link="row" class="table table-hover table-condensed">
+    <thead>
     <tr>
         <th align="left">Name</th>
-        <th style="padding-left: 20pt;">Type</th>
-        <th style="padding-left: 20pt;">Modification date</th>
         <th style="padding-left: 20pt;">Size</th>
-    </tr>"""
+        <th style="padding-left: 20pt;">Modification date</th>
+    </tr>
+    </thead>
+    <tbody>"""
 
-html_foot = """</table>
+html_foot = """</tbody></table>
+</div>
 <hr>
 </html>"""
 
 filename_entry = """
-    <tr class=$class_name>
-        <td width="40%"><a href="$link">$filename</a></td>
-        <td style="padding-left: 20pt;" width="20%">$filetype</td>
-        <td style="padding-left: 20pt;" width="20%">$mtime</td>
-        <td style="padding-left: 20pt;" width="20%">$size</td>
+    <tr>
+        <td width="40%"><i class="glyphicon $class_name"></i> <a href="$link">$filename</a></td>
+        <td style="padding-left: 20pt;" width="30%">$size</td>
+        <td style="padding-left: 20pt;" width="30%">$mtime</td>
     </tr>
 """
 
@@ -59,15 +73,14 @@ def list_file_entries(file_list, dirname):
     for filename in file_list:
         realpath = os.path.join(dirname, filename)
         is_dir = True if os.path.isdir(realpath) else False
-        file_type = 'Dir' if is_dir else 'File'
+        size = '&ltdirectory&gt' if is_dir else human_readable_size(os.path.getsize(realpath))
         link_path = '/' + os.path.relpath(realpath, os.getcwd())
         body += string.Template(filename_entry).substitute(
             link=link_path,
             filename=filename,
-            filetype=file_type,
             mtime=time.ctime(os.path.getmtime(realpath)),
-            size=human_readable_size(os.path.getsize(realpath)),
-            class_name='dir' if is_dir else 'file')
+            size=size,
+            class_name='glyphicon-folder-close' if is_dir else 'glyphicon-file')
     return body
 
 
