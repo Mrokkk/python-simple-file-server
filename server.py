@@ -24,7 +24,7 @@ html_head = """<!DOCTYPE html>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/.css/style.css" />
+<link rel="stylesheet" type="text/css" href="/.css/style.css">
 </head>
 <div class="container-fluid">
 <h1>$title</h1>
@@ -32,7 +32,7 @@ html_head = """<!DOCTYPE html>
 <hr>
 <div class="container-fluid">
 <form>
-  <input type="text" class="form-control" name="search" placeholder="Search...">
+    <input type="text" class="form-control" name="search" placeholder="Search...">
 </form>
 </div>
 <div class="container-fluid">
@@ -153,7 +153,7 @@ def query_handle_response(filename, query_string):
     if query[0] == 'search':
         return web.Response(body=search_result_body(filename, query[1]).encode(),
                             headers={'Content-Type': 'text/html'})
-    return web.Response()
+    return web.Response(status=405)
 
 
 async def handle(request):
