@@ -39,14 +39,10 @@ body {
 </head>
 <div class="container-fluid">
 <h1>$title</h1>
-</div>
 <hr>
-<div class="container-fluid">
 <form>
     <input type="text" class="form-control" name="search" placeholder="Search...">
 </form>
-</div>
-<div class="container-fluid">
 <table data-link="row" class="table table-hover table-condensed">
     <thead>
     <tr>
@@ -64,7 +60,7 @@ html_foot = """</tbody></table>
 
 filename_entry = """
     <tr>
-        <td width="40%"><i class="glyphicon $class_name"></i> <a href="$link">$filename</a></td>
+        <td width="40%"><i class="glyphicon $icon"></i> <a href="$link">$filename</a></td>
         <td style="padding-left: 20pt;" width="30%">$size</td>
         <td style="padding-left: 20pt;" width="30%">$mtime</td>
     </tr>
@@ -91,7 +87,7 @@ def list_file_entries(file_list, dirname):
             filename=filename,
             mtime=time.ctime(os.path.getmtime(realpath)),
             size=size,
-            class_name='glyphicon-folder-close' if is_dir else 'glyphicon-file')
+            icon='glyphicon-folder-close' if is_dir else 'glyphicon-file')
     return body
 
 
