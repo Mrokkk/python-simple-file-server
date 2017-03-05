@@ -15,8 +15,8 @@ import re
 
 html_head = """<!DOCTYPE html>
 <html>
-<title>$title</title>
 <head>
+<title>$title</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -25,44 +25,65 @@ html_head = """<!DOCTYPE html>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
 <style>
-* {
-    padding:0;
-    margin:0;
-}
 body {
     color: #333;
-    font: 14px Sans-Serif;
-    padding: 20px;
+    font: 16px Sans-Serif;
     background: #eee;
+}
+a:hover {
+    text-decoration: none;
 }
 </style>
 </head>
-<div class="container-fluid">
-<h1>$title</h1>
+<body data-spy="scroll" data-target=".navbar" data-offset="100">
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <ul class="nav navbar-nav">
+        <li>
+            <div class="navbar-header">
+                <a class="navbar-brand" href="">$title</a>
+            </div>
+        </li>
+        <li>
+            <form class="navbar-form">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search..." style="width: 300px;">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" type="submit">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </li>
+    </ul>
+</nav>
+<div class="container">
 <hr>
-<form>
-    <input type="text" class="form-control" name="search" placeholder="Search...">
-</form>
+<hr>
 <table data-link="row" class="table table-hover table-condensed">
     <thead>
     <tr>
-        <th align="left">Name</th>
-        <th style="padding-left: 20pt;">Size</th>
-        <th style="padding-left: 20pt;">Modification date</th>
+        <th></th>
+        <th>Name</th>
+        <th>Size</th>
+        <th>Modification date</th>
     </tr>
     </thead>
     <tbody>"""
 
 html_foot = """</tbody></table>
 </div>
-<hr>
+</body>
 </html>"""
 
 filename_entry = """
     <tr>
-        <td width="40%"><i class="glyphicon $icon"></i> <a href="$link">$filename</a></td>
-        <td style="padding-left: 20pt;" width="30%">$size</td>
-        <td style="padding-left: 20pt;" width="30%">$mtime</td>
+        <td width="2%" style="vertical-align: middle;">
+            <i class="glyphicon $icon"></i>
+        </td>
+        <td width="38%" style="vertical-align: middle;"><a href="$link">$filename</a></td>
+        <td width="30%" style="vertical-align: middle;">$size</td>
+        <td width="30%" style="vertical-align: middle;">$mtime</td>
     </tr>
 """
 
