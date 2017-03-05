@@ -24,7 +24,18 @@ html_head = """<!DOCTYPE html>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/.css/style.css">
+<style>
+* {
+    padding:0;
+    margin:0;
+}
+body {
+    color: #333;
+    font: 14px Sans-Serif;
+    padding: 20px;
+    background: #eee;
+}
+</style>
 </head>
 <div class="container-fluid">
 <h1>$title</h1>
@@ -214,8 +225,6 @@ def main():
     args = parse_argv()
     log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
     app = web.Application(logger=log)
-    app.router.add_static('/.css', os.path.join(os.path.dirname(sys.argv[0]), 'css'))
-    app.router.add_static('/.icons', os.path.join(os.path.dirname(sys.argv[0]), 'icons'))
     app.router.add_get('/{tail:.*}', handle)
     web.run_app(app, port=args.port, ssl_context=create_ssl_context(args.ssl))
 
