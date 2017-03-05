@@ -84,7 +84,7 @@ def list_file_entries(file_list, dirname):
     for filename in file_list:
         realpath = os.path.join(dirname, filename)
         is_dir = True if os.path.isdir(realpath) else False
-        size = '&ltdirectory&gt' if is_dir else human_readable_size(os.path.getsize(realpath))
+        size = '' if is_dir else human_readable_size(os.path.getsize(realpath))
         link_path = '/' + os.path.relpath(realpath, os.getcwd())
         body += string.Template(filename_entry).substitute(
             link=link_path,
@@ -98,7 +98,7 @@ def list_file_entries(file_list, dirname):
 def directory_listing_body(dirname):
     body = string.Template(html_head).substitute(title='Directory listing /' + dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
-    list = os.listdir(real_dirname)
+    list = [f for f in os.listdir(real_dirname) if not f.startswith('.')]
     list.insert(0, '..')
     body += list_file_entries(list, real_dirname)
     body += html_foot
