@@ -108,7 +108,7 @@ def list_file_entries(file_list, dirname):
             filename=filename,
             mtime=time.strftime("%d-%m-%y %H:%M:%S", time.gmtime(os.path.getmtime(realpath))),
             size=size,
-            icon='glyphicon-folder-close' if is_dir else 'glyphicon-file')
+            icon='glyphicon-folder-open' if is_dir else 'glyphicon-file')
     return body
 
 
