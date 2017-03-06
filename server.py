@@ -106,7 +106,7 @@ def list_file_entries(file_list, dirname):
         body += string.Template(filename_entry).substitute(
             link=link_path,
             filename=filename,
-            mtime=time.ctime(os.path.getmtime(realpath)),
+            mtime=time.strftime("%d-%m-%y %H:%M:%S", time.gmtime(os.path.getmtime(realpath))),
             size=size,
             icon='glyphicon-folder-close' if is_dir else 'glyphicon-file')
     return body
