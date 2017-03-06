@@ -100,7 +100,7 @@ def list_file_entries(file_list, dirname):
     body = ''
     for filename in file_list:
         realpath = os.path.join(dirname, filename)
-        is_dir = True if os.path.isdir(realpath) else False
+        is_dir = os.path.isdir(realpath)
         size = '' if is_dir else human_readable_size(os.path.getsize(realpath))
         link_path = '/' + os.path.relpath(realpath, os.getcwd())
         body += string.Template(filename_entry).substitute(
