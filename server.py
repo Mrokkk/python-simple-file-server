@@ -19,11 +19,11 @@ html_head = """<!DOCTYPE html>
 <title>$title</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
+<script src="/.static/jquery/jquery.min.js"></script>
+<link rel="stylesheet" href="/.static/bootstrap/css/bootstrap.min.css">
+<script src="/.static/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="/.static/jasny-bootstrap/css/jasny-bootstrap.min.css">
+<script src="/.static/jasny-bootstrap/js/jasny-bootstrap.min.js"></script>
 <style>
 body {
     color: #333;
@@ -242,6 +242,7 @@ def main():
     args = parse_argv()
     log = configure_logger(os.path.join(os.path.dirname(sys.argv[0]), 'log'))
     app = web.Application(logger=log)
+    app.router.add_static('/.static', os.path.join(os.path.dirname(sys.argv[0]), 'static'))
     app.router.add_get('/{tail:.*}', handle)
     web.run_app(app, port=args.port, ssl_context=create_ssl_context(args.ssl))
 
