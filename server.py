@@ -99,6 +99,8 @@ def human_readable_size(num, suffix='B'):
 def list_file_entries(file_list, dirname):
     body = ''
     for filename in file_list:
+        if not os.path.exists(os.path.join(dirname, filename)):
+            continue
         realpath = os.path.join(dirname, filename)
         is_dir = os.path.isdir(realpath)
         size = '' if is_dir else human_readable_size(os.path.getsize(realpath))
