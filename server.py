@@ -118,6 +118,7 @@ def directory_listing_body(dirname):
     body = string.Template(html_head).substitute(title='Directory listing /' + dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
     list = [f for f in os.listdir(real_dirname) if not f.startswith('.')]
+    list.sort()
     list.insert(0, '..')
     body += list_file_entries(list, real_dirname)
     body += html_foot
@@ -197,7 +198,7 @@ async def handle(request):
                     'Content-Type': 'image/x-icon'
                 })
     if not os.path.exists(os.path.normpath(filename)):
-        return web.Response(status=404)
+        return web.HTTPNotFound()
     if os.path.isdir(os.path.normpath(filename)):
         return directory_response(filename)
     if filename.endswith('.html'):
