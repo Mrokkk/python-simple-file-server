@@ -189,6 +189,8 @@ def query_handle_response(filename, query_string):
 
 async def handle(request):
     filename = str(request.path)[1:]
+    if filename.startswith('/'):
+        return web.HTTPNotFound()
     query_string = str(request.query_string)
     if query_string != '':
         return query_handle_response(filename, query_string)
