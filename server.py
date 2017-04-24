@@ -106,7 +106,7 @@ def list_file_entries(file_list, dirname):
         size = '' if is_dir else human_readable_size(os.path.getsize(realpath))
         link_path = '/' + os.path.relpath(realpath, os.getcwd())
         body += string.Template(filename_entry).substitute(
-            link=link_path,
+            link=filename,
             filename=filename,
             mtime=time.strftime("%d-%m-%y %H:%M:%S", time.gmtime(os.path.getmtime(realpath))),
             size=size,
@@ -200,6 +200,8 @@ async def handle(request):
     if not os.path.exists(os.path.normpath(filename)):
         return web.HTTPNotFound()
     if os.path.isdir(os.path.normpath(filename)):
+        if (filename != '' and not filename.endswith('/')):
+            return web.HTTPFound(request.path + '/')
         return directory_response(filename)
     if filename.endswith('.html'):
         return html_response(filename)
