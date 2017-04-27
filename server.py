@@ -37,41 +37,38 @@ a:hover {
 </head>
 <body data-spy="scroll" data-target=".navbar" data-offset="100">
 <nav class="navbar navbar-inverse navbar-fixed-top">
-    <ul class="nav navbar-nav">
-        <li>
-            <div class="navbar-header">
-                <a class="navbar-brand" href="">$title</a>
-            </div>
-        </li>
-        <li>
-            <form class="navbar-form">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search..." style="width: 300px;">
-                    <div class="input-group-btn">
-                        <button class="btn btn-default" type="submit">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
-                    </div>
+    <div class="container">
+        <ul class="nav navbar-nav">
+            <li>
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">File server</a>
                 </div>
-            </form>
-        </li>
-    </ul>
+            </li>
+            <li>
+                <form class="navbar-form">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search..." style="width: 300px;">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="submit">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </li>
+        </ul>
+    </div>
 </nav>
-<div class="container">
-<hr>
-<hr>
-<table data-link="row" class="table table-hover table-condensed">
-    <thead>
-    <tr>
-        <th></th>
-        <th>Name</th>
-        <th>Size</th>
-        <th>Modification date</th>
-    </tr>
-    </thead>
+<div class="container" style="padding-top: 60px;">
+<div class="panel panel-default">
+<div id="panel-head" class="panel-heading">
+    $path_buttons
+</div>
+<div id="panel-body" class="panel-body" style="padding: 0;">
+<table data-link="row" class="table table-hover table-condensed" style="margin-bottom: 0;">
     <tbody>"""
 
-html_foot = """</tbody></table>
+html_foot = """</tbody></table></div></div>
 </div>
 </body>
 </html>"""
@@ -86,6 +83,24 @@ filename_entry = """
         <td width="30%" style="vertical-align: middle;">$mtime</td>
     </tr>
 """
+
+path_button_entry = """<a href=$link role="button" class="btn btn-primary">$dirname</a>
+"""
+
+
+def create_path_buttons(dirname):
+    dirname = '/' + dirname
+    body = '<div id="path-buttons" class="btn-group">\n'
+    body += string.Template(path_button_entry).substitute(link='/', dirname='/')
+    body += '</div>\n'
+    path = '/'
+    for element in dirname.split('/'):
+        if element:
+            path = os.path.join(path, element)
+            body += '<div id="path-buttons" class="btn-group">\n'
+            body += string.Template(path_button_entry).substitute(link=path, dirname=element)
+            body += '</div>\n'
+    return body
 
 
 def human_readable_size(num, suffix='B'):
@@ -115,7 +130,7 @@ def list_file_entries(file_list, dirname):
 
 
 def directory_listing_body(dirname):
-    body = string.Template(html_head).substitute(title='Directory listing /' + dirname)
+    body = string.Template(html_head).substitute(path_buttons=create_path_buttons(dirname), title='Directory listing /' + dirname)
     real_dirname = os.path.join(os.getcwd(), dirname)
     list = [f for f in os.listdir(real_dirname) if not f.startswith('.')]
     list.sort()
@@ -167,7 +182,7 @@ def filetype_fallback(filename):
 
 
 def search_result_body(dirname, name):
-    body = string.Template(html_head).substitute(title='Search result for "' + name + '"')
+    body = string.Template(html_head).substitute(path_buttons=create_path_buttons(dirname), title='Search result for "' + name + '"')
     real_dirname = os.path.join(os.getcwd(), dirname)
     file_list = [file for file in glob.glob(os.path.join(dirname, '**/*'), recursive=True)]
     list = [file for file in file_list if name.lower() in file.lower()]
