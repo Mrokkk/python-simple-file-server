@@ -159,6 +159,12 @@ def text_file_response(filename):
             'Content-Disposition': 'inline'
         })
 
+def css_file_response(filename):
+    with open(filename) as f:
+        return web.Response(body=f.read().encode(), headers={
+            'Content-Type': 'text/css',
+            'Content-Disposition': 'inline'
+        })
 
 def html_response(filename):
     with open(filename) as f:
@@ -226,6 +232,8 @@ async def handle(request):
     if not filetype:
         filetype = filetype_fallback(filename)
     if 'text' in filetype:
+        if filename.endswith('.css'):
+            return css_file_response(filename)
         return text_file_response(filename)
     else:
         return await binary_file_response(filename, filetype, request)
